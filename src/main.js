@@ -102,10 +102,12 @@ function createWorld(container) {
 
     const ambientLight = new THREE.AmbientLight('white', 2);
     const dirLight = new THREE.DirectionalLight('white', 3);
-    dirLight.position.set(0, 1, -2);
+    const dirLight2 = new THREE.DirectionalLight('white', 5);
+    dirLight.position.set(0, 0, -1);
+    dirLight2.position.set(1, 0, 1);
 
     loop.updatables.push(controls);
-    scene.add(ambientLight, dirLight);
+    scene.add(ambientLight, dirLight, dirLight2);
     const resizer = new Resizer(container, camera, renderer);
 
     return {camera, renderer, scene, loop};
