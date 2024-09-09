@@ -118,8 +118,8 @@ async function main() {
     const container = document.querySelector('#scene-container');
     const {camera, renderer, scene, loop} = createWorld(container);
 
-    const modelPath = '/assets/PRSModel/PRSModel.obj';
-    const materialPath = '/assets/PRSModel/PRSModel.mtl';
+    const modelPath = '../assets/PRSModel/PRSModel.obj';
+    const materialPath = '../assets/PRSModel/PRSModel.mtl';
     const model = loadModel(materialPath, modelPath, 0, 0, 0, scene);
 
     // remap materials
