@@ -4,32 +4,35 @@ import {OBJLoader} from '../lib/examples/jsm/loaders/OBJLoader.js';
 import {OrbitControls} from '../lib/examples/jsm/controls/OrbitControls.js';
 
 function loadModel(matPath, objPath, x, y, z, scene) {
+    console.log('Loading material from ' + matPath);
+    console.log('Loading model from ' + objPath);
     const loader = new MTLLoader();
+    loader.setPath('../assets/PRSModel/');
     loader.load(
         matPath,
         function(materials) {
             materials.preload();
             const objLoader = new OBJLoader();
             objLoader.setMaterials(materials);
+            objLoader.setPath('../assets/PRSModel/');
             objLoader.load(
                 objPath,
                 function(object) {
-                    console.log(object);
                     scene.add(object);
                 },
                 function(progress) {
-                    console.log((progress.loaded/progress.total*100) + "%");
+                    console.log((progress.loaded/progress.total*100) + '%');
                 },
                 function(error) {
-                    console.log("Error while loading OBJ: " + error);
+                    console.log('Error while loading OBJ: ' + error);
                 }
             );
         },
         function(progress) {
-            console.log((progress.loaded/progress.total*100)+"%");
+            console.log((progress.loaded/progress.total*100)+'%');
         },
         function(error) {
-            console.log("Error while loading MTL: " + error);
+            console.log('Error while loading MTL: ' + error);
         }
     );
 }
@@ -118,8 +121,8 @@ async function main() {
     const container = document.querySelector('#scene-container');
     const {camera, renderer, scene, loop} = createWorld(container);
 
-    const modelPath = '../assets/PRSModel/PRSModel.obj';
-    const materialPath = '../assets/PRSModel/PRSModel.mtl';
+    const modelPath = 'PRSModel.obj';
+    const materialPath = 'PRSModel.mtl';
     const model = loadModel(materialPath, modelPath, 0, 0, 0, scene);
 
     // remap materials
