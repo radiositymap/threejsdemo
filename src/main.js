@@ -1,7 +1,7 @@
-import * as THREE from '/lib/three.module.js';
-import {MTLLoader} from '/lib/examples/jsm/loaders/MTLLoader.js';
-import {OBJLoader} from '/lib/examples/jsm/loaders/OBJLoader.js';
-import {OrbitControls} from '/lib/examples/jsm/controls/OrbitControls.js';
+import * as THREE from '../lib/three.module.js';
+import {MTLLoader} from '../lib/examples/jsm/loaders/MTLLoader.js';
+import {OBJLoader} from '../lib/examples/jsm/loaders/OBJLoader.js';
+import {OrbitControls} from '../lib/examples/jsm/controls/OrbitControls.js';
 
 function loadModel(matPath, objPath, x, y, z, scene) {
     const loader = new MTLLoader();
@@ -90,7 +90,7 @@ function createWorld(container) {
     renderer.physicallyCorrectLights = true;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('grey');
+    scene.background = new THREE.Color('silver');
 
     const loop = new Loop(camera, scene, renderer);
     container.append(renderer.domElement);
