@@ -7,14 +7,12 @@ function loadModel(matPath, objPath, x, y, z, scene) {
     console.log('Loading material from ' + matPath);
     console.log('Loading model from ' + objPath);
     const loader = new MTLLoader();
-    loader.setPath('../assets/PRSModel/');
     loader.load(
         matPath,
         function(materials) {
             materials.preload();
             const objLoader = new OBJLoader();
             objLoader.setMaterials(materials);
-            objLoader.setPath('../assets/PRSModel/');
             objLoader.load(
                 objPath,
                 function(object) {
@@ -120,9 +118,10 @@ function render(renderer, scene, camera) {
 async function main() {
     const container = document.querySelector('#scene-container');
     const {camera, renderer, scene, loop} = createWorld(container);
+    const currDir = window.location.href;
 
-    const modelPath = 'PRSModel.obj';
-    const materialPath = 'PRSModel.mtl';
+    const modelPath = currDir + '/../assets/PRSModel/PRSModel.obj';
+    const materialPath = currDir + '/../assets/PRSModel/PRSModel.mtl';
     const model = loadModel(materialPath, modelPath, 0, 0, 0, scene);
 
     // remap materials
