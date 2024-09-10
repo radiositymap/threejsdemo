@@ -152,8 +152,8 @@ async function main() {
     // remap materials
 
     // neck
-    const texture =
-        new THREE.TextureLoader().load('../assets/PRSModel/NeckWood.jpg');
+    const woodTexPath = currDir + '../assets/PRSModel/NeckWood.jpg';
+    const texture = new THREE.TextureLoader().load(woodTexPath);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(5, 1);
@@ -166,8 +166,8 @@ async function main() {
         });
 
     // logo
-    const textureLogo =
-        new THREE.TextureLoader().load('../assets/PRSModel/PRSLogo.jpg');
+    const logoTexPath = currDir + '../assets/PRSModel/PRSLogo.jpg';
+    const textureLogo = new THREE.TextureLoader().load(logoTexPath);
     textureLogo.center.set(0.5, 0.5);
     textureLogo.rotation = -Math.PI/2;
     model.getObjectByName('Plane.005_Plane.007').material =
@@ -179,8 +179,8 @@ async function main() {
         });
 
     // birds
-    const textureBirds =
-        new THREE.TextureLoader().load('../assets/PRSModel/PRSBirds.png');
+    const birdsTexPath = currDir + '../assets/PRSModel/PRSBirds.png';
+    const textureBirds = new THREE.TextureLoader().load(birdsTexPath);
     const birdMat = new THREE.MeshPhysicalMaterial({
             color: 0xaaddff,
             metalness: 1.0,
