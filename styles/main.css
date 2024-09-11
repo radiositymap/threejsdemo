@@ -33,3 +33,22 @@ h1 {
   */
   background-color: silver;
 }
+
+#message {
+  display:inline;
+  position: absolute;
+  width:100%;
+  left:0;
+  background-color: rgba(0,0,0,0);
+  z-index: 1;
+}
+
+#footer {
+  display:inline;
+  position: absolute;
+  width:100%;
+  left:0;
+  bottom:10px;
+  background-color: rgba(0,0,0,0);
+  z-index: 1;
+}
