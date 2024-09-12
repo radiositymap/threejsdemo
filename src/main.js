@@ -3,8 +3,15 @@ import {GUI} from '../lib/examples/jsm/libs/lil-gui.module.min.js';
 import {MTLLoader} from '../lib/examples/jsm/loaders/MTLLoader.js';
 import {OBJLoader} from '../lib/examples/jsm/loaders/OBJLoader.js';
 import {OrbitControls} from '../lib/examples/jsm/controls/OrbitControls.js';
+import {depthvert} from '../shaders/depthvert.js';
+import {depthfrag} from '../shaders/depthfrag.js';
 
 const currDir = window.location.href;
+var target = null;
+var depthScene = null;
+var depthCamera = null;
+var depthMaterial = null;
+var renderDepth = false;
 
 function setLoadingMessage(message, request) {
     var progress = Math.round(request.loaded/request.total*100);
@@ -92,8 +99,21 @@ class Loop {
     start() {
         this.renderer.setAnimationLoop(() => {
                 this.tick();
-                this.renderer.render(this.scene, this.camera);
-                });
+
+                if (renderDepth) {
+                    this.renderer.setRenderTarget(target);
+                    this.renderer.render(this.scene, this.camera);
+
+                    depthMaterial.uniforms.depthTex.value =
+                        target.depthTexture;
+
+                    this.renderer.setRenderTarget(null);
+                    this.renderer.render(depthScene, depthCamera);
+                } else {
+                    this.renderer.setRenderTarget(null);
+                    this.renderer.render(this.scene, this.camera);
+                }
+            });
     }
 
     stop() {
@@ -147,21 +167,34 @@ function createUI(model, materials) {
         wireframeColour: 0x93ffe8
     }
     const meshes = model.children;
-    settingsFolder.add(settings, 'renderMode', {Lit: 0, Wireframe: 1})
+    settingsFolder.add(settings,
+        'renderMode', {Lit: 0, Wireframe: 1, Depth: 2})
         .name('Render Mode')
         .onChange(val => {
             if (val == 0) {
+                renderDepth = false;
                 for (var i=0; i<meshes.length; i++)
                     meshes[i].material = materials[meshes[i].name];
             }
             if (val == 1) {
+                renderDepth = false;
                 const wireMat = new THREE.MeshBasicMaterial({
                     color: settings.wireframeColour,
                     wireframe: true,
                     wireframeLinewidth: 0.2
                 });
+                wireMat.name = 'Wireframe';
                 for (var i=0; i<meshes.length; i++)
                     meshes[i].material = wireMat;
+            }
+            if (val == 2) {
+                renderDepth = true;
+                const depthMat = new THREE.MeshBasicMaterial({
+                    wireframe: false,
+                });
+                depthMat.name = 'Depth';
+                for (var i=0; i<meshes.length; i++)
+                    meshes[i].material = depthMat;
             }
          });
     settingsFolder.addColor(settings, 'wireframeColour')
@@ -186,6 +219,7 @@ function createUI(model, materials) {
             components[meshes[i].name] = 'null';
         modelFolder.add(components, meshes[i].name);
     }
+    modelFolder.close();
 }
 
 function delay(time) {
@@ -309,9 +343,48 @@ function saveMaterials(model) {
     return materials;
 }
 
+function initRenderTarget(renderer) {
+    if (target)
+        target.dispose();
+
+    const format = parseInt( THREE.DepthFormat );
+    const type = parseInt( THREE.UnsignedShortType );
+    const samples = parseInt( 0 );
+
+    const dpr = renderer.getPixelRatio();
+    target = new THREE.WebGLRenderTarget(
+            window.innerWidth * dpr, window.innerHeight * dpr);
+    target.texture.minFilter = THREE.NearestFilter;
+    target.texture.magFilter = THREE.NearestFilter;
+    target.stencilBuffer =
+        (format === THREE.DepthStencilFormat) ? true : false;
+    target.samples = samples;
+
+    target.depthTexture = new THREE.DepthTexture();
+    target.depthTexture.format = format;
+    target.depthTexture.type = type;
+}
+
+function initDepthPass() {
+    depthCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    depthMaterial = new THREE.ShaderMaterial({
+        vertexShader: depthvert,
+        fragmentShader: depthfrag,
+        uniforms: {
+            depthTex: {value:null}
+        }
+    });
+    const plane = new THREE.PlaneGeometry(2,2);
+    const quad = new THREE.Mesh(plane, depthMaterial);
+    depthScene = new THREE.Scene();
+    depthScene.add(quad);
+}
+
 async function main() {
     const container = document.querySelector('#scene-container');
     const {camera, renderer, scene, loop} = createWorld(container);
+    initRenderTarget(renderer);
+    initDepthPass();
 
     const modelPath = currDir + '/../assets/PRSModel/PRSModel.obj';
     const materialPath = currDir + '/../assets/PRSModel/PRSModel.mtl';
