@@ -13,7 +13,28 @@ function setLoadingMessage(message, request) {
         document.querySelector('#message').innerHTML = "";
 }
 
-function loadModel(matPath, objPath, x, y, z, scene, rootName) { const loader = new MTLLoader();
+function loadEnvMap(scene, sceneRoot, mapPath) {
+    var textureLoader = new THREE.TextureLoader();
+    var envMap = textureLoader.load(mapPath);
+    envMap.mapping = THREE.EquirectangularReflectionMapping;
+    sceneRoot.traverse((node) => {
+            if (node.isMesh) {
+                if (Array.isArray(node.material)) {
+                    for (var i=0; i<node.material.length; i++)
+                        node.material[i].envMap = envMap;
+                }
+                else
+                    node.material.envMap = envMap;
+            }
+        });
+    scene.background = envMap;
+    scene.backgroundBlurriness = 0.1;
+    scene.environment = envMap;
+    return sceneRoot;
+}
+
+function loadModel(matPath, objPath, envPath, scene, rootName) {
+    const loader = new MTLLoader();
     loader.load(matPath,
         function(materials) {
             materials.preload();
@@ -104,9 +125,9 @@ function createWorld(container) {
     controls.enableDamping = true;
     controls.tick = () => controls.update();
 
-    const ambientLight = new THREE.AmbientLight('white', 2);
-    const dirLight = new THREE.DirectionalLight('white', 3);
-    const dirLight2 = new THREE.DirectionalLight('white', 5);
+    const ambientLight = new THREE.AmbientLight('white', 1);
+    const dirLight = new THREE.DirectionalLight('white', 2);
+    const dirLight2 = new THREE.DirectionalLight('white', 3.8);
     dirLight.position.set(0, 0, -1);
     dirLight2.position.set(1, 0, 1.2);
 
@@ -182,9 +203,10 @@ function remapMaterials(model) {
             metalness: 0,
             roughness: 0.1,
             map: textureTop,
-            clearcoat: 0.35,
+            clearcoat: 0.8,
             clearcoatRoughness: 0,
-            reflectivity: 0.8
+            reflectivity: 0.8,
+            specularIntensity: 0.3
         });
     topMat.name = 'Top';
     model.getObjectByName('Plane').material[1] = topMat;
@@ -228,14 +250,14 @@ function remapMaterials(model) {
     const birdMat = new THREE.MeshPhysicalMaterial({
             color: 0xbdedff,
             metalness: 1.0,
-            roughness: 0.5,
+            roughness: 0.6,
             normalMap: normBirds,
             normalMapType: THREE.ObjectSpaceNormalMap,
             alphaMap: textureBirds,
             transparent: true,
             opacity: 1.0,
-            iridescence: 1.0,
-            iridescenceIOR: 1.2
+            iridescence: 0.9,
+            iridescenceIOR: 1.8
         });
     birdMat.name = 'Birds';
     model.getObjectByName('Plane.007_Plane.019').material = birdMat;
@@ -251,9 +273,9 @@ function remapMaterials(model) {
 
     // metal
     const metalMat = new THREE.MeshPhysicalMaterial({
-            color: 0xbbbbbb,
+            color: 0xffffff,
             metalness: 1.0,
-            roughness: 0.15,
+            roughness: 0.7,
             reflectivity: 0.9,
             opacity: 1
         });
@@ -270,12 +292,10 @@ function remapMaterials(model) {
     // glass
     const glassMat = new THREE.MeshPhysicalMaterial({
             color: 0xffffff,
-            metalness: 0,
-            roughness: 0.1,
-            transparent: true,
-            transmission: 0.7,
-            opacity: 0.3,
-            ior: 1.4
+            roughness: 0.01,
+            transmission: 1,
+            thickness: 0.02,
+            ior: 0.666
         });
     glassMat.name = 'Glassy';
     model.getObjectByName('Cylinder.024_Cylinder.025').material[1] = glassMat;
@@ -295,7 +315,8 @@ async function main() {
 
     const modelPath = currDir + '/../assets/PRSModel/PRSModel.obj';
     const materialPath = currDir + '/../assets/PRSModel/PRSModel.mtl';
-    loadModel(materialPath, modelPath, 0, 0, 0, scene, 'scene_root');
+    const envMapPath = currDir + '/../assets/brown_photostudio_07.jpg';
+    loadModel(materialPath, modelPath, envMapPath, scene, 'scene_root');
     var model = null;
     do {
         model = scene.getObjectByName('scene_root');
@@ -307,6 +328,7 @@ async function main() {
         'https://www.cgtrader.com/designers/bootbadger04';
 
     remapMaterials(model);
+    loadEnvMap(scene, model, envMapPath);
     const materials = saveMaterials(model);
     createUI(model, materials);
 
