@@ -16,8 +16,6 @@ var renderDepth = false;
 function setLoadingMessage(message, request) {
     var progress = Math.round(request.loaded/request.total*100);
     document.querySelector('#message').innerHTML = message + progress + '%';
-    if (progress == 100)
-        document.querySelector('#message').innerHTML = "";
 }
 
 function loadEnvMap(scene, sceneRoot, mapPath) {
@@ -307,10 +305,9 @@ function remapMaterials(model) {
 
     // metal
     const metalMat = new THREE.MeshPhysicalMaterial({
-            color: 0xffffff,
+            color: 0x999999,
             metalness: 1.0,
-            roughness: 0.7,
-            reflectivity: 0.9,
+            roughness: 0.15,
             opacity: 1
         });
     metalMat.name = 'Metallic';
@@ -334,6 +331,15 @@ function remapMaterials(model) {
     glassMat.name = 'Glassy';
     model.getObjectByName('Cylinder.024_Cylinder.025').material[1] = glassMat;
     model.getObjectByName('Cylinder.025_Cylinder.027').material[1] = glassMat;
+    // cavity cover
+    const coverMat = new THREE.MeshPhysicalMaterial({
+            color: 0x000000,
+            metalness: 0.5,
+            roughness: 0.3,
+            reflectivity: 0.8
+        });
+    coverMat.name = 'Cover';
+    model.getObjectByName('Cube.037_Cube.294').material = coverMat;
 }
 
 function saveMaterials(model) {
@@ -395,6 +401,7 @@ async function main() {
         model = scene.getObjectByName('scene_root');
         await delay(1000);
     } while (model == null);
+    document.querySelector('#message').innerHTML = "";
 
     document.querySelector('#footer').innerHTML =
         'Model and textures from ' +
