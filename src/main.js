@@ -325,8 +325,8 @@ function remapMaterials(model) {
             color: 0xffffff,
             roughness: 0.01,
             transmission: 1,
-            thickness: 0.02,
-            ior: 0.666
+            thickness: 0.025,
+            ior: 1.5
         });
     glassMat.name = 'Glassy';
     model.getObjectByName('Cylinder.024_Cylinder.025').material[1] = glassMat;
